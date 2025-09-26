@@ -369,3 +369,15 @@ html = html_template.replace("{CRUSH_NAME}", CRUSH_NAME).replace("{TARGET_ISO}",
 # --------- Render in Streamlit ----------
 st.components.v1.html(html, height=900, scrolling=False)
 
+import streamlit as st
+
+# Hide Streamlit header/footer and menu
+st.set_page_config(page_title="Happy Birthday", page_icon="💖", layout="wide")
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}      /* hides menu (top-right hamburger) */
+    footer {visibility: hidden;}         /* hides footer (Streamlit branding) */
+    header {visibility: hidden;}         /* hides top bar completely */
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
