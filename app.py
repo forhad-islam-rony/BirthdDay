@@ -8,7 +8,7 @@ st.set_page_config(page_title="Happy Birthday Ayman Zerin 🎂", page_icon="🎉
 # --------- Config ----------
 CRUSH_NAME = "Ayman Zerin"
 BIRTHDAY_MONTH = 9
-BIRTHDAY_DAY = 26
+BIRTHDAY_DAY = 27
 
 from datetime import datetime, date, time
 
@@ -27,7 +27,7 @@ else:
     next_bday = date(now.year + 1, BIRTHDAY_MONTH, BIRTHDAY_DAY)
 
 # Countdown target: end of birthday day
-target_iso = datetime.combine(next_bday, time(23, 59, 59)).isoformat()
+target_iso = datetime.combine(next_bday, time(1, 0, 0)).isoformat()
 
 
 
