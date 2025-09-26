@@ -197,7 +197,7 @@ html_template = r"""
       <div class="controls">
         <button class="btn btn-primary" id="surpriseBtn">Surprise Me 🎆</button>
       </div>
-      <div class="note">You are the prettiest girl, with the most beautiful soul that lights up the world".</div>
+      <div class="note">You are the prettiest girl, with the most beautiful soul that lights up the world ✨</div>
     </div>
   </div>
 
