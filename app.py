@@ -4,24 +4,32 @@ from datetime import datetime, date
 
 st.set_page_config(page_title="Happy Birthday Ayman Zerin 🎂", page_icon="🎉", layout="wide")
 
+
 # --------- Config ----------
 CRUSH_NAME = "Ayman Zerin"
 BIRTHDAY_MONTH = 9
-BIRTHDAY_DAY = 27
-BACKGROUND_MUSIC_URL = ""  # optional direct mp3 link. Leave empty for no music.
+BIRTHDAY_DAY = 26
 
-# compute next birthday date (server local)
+from datetime import datetime, date, time
+
 now = datetime.now()
-year = now.year
-try:
-    next_bday = date(year, BIRTHDAY_MONTH, BIRTHDAY_DAY)
-except Exception:
-    next_bday = date(year, BIRTHDAY_MONTH, BIRTHDAY_DAY)
-if next_bday <= now.date():
-    next_bday = date(year + 1, BIRTHDAY_MONTH, BIRTHDAY_DAY)
+today = now.date()
 
-# Use ISO string for JS countdown
-target_iso = datetime(next_bday.year, next_bday.month, next_bday.day, 0, 0, 0).isoformat()
+# Birthday this year
+bday_this_year = date(now.year, BIRTHDAY_MONTH, BIRTHDAY_DAY)
+
+if today == bday_this_year:
+    next_bday = today   # Today is birthday
+elif today < bday_this_year:
+    next_bday = bday_this_year
+else:
+    # Birthday passed this year
+    next_bday = date(now.year + 1, BIRTHDAY_MONTH, BIRTHDAY_DAY)
+
+# Countdown target: end of birthday day
+target_iso = datetime.combine(next_bday, time(23, 59, 59)).isoformat()
+
+
 
 # --------- HTML Template (raw string, will replace placeholders) ----------
 html_template = r"""
@@ -187,16 +195,12 @@ html_template = r"""
       </div>
 
       <div class="controls">
-        <button class="btn btn-primary" id="surpriseBtn">Surprise 🎇</button>
-        <button class="btn btn-soft" id="musicBtn">Play Music ♪</button>
+        <button class="btn btn-primary" id="surpriseBtn">Surprise Me 🎆</button>
       </div>
       <div class="note">You are the prettiest girl, with the most beautiful soul that lights up the world".</div>
     </div>
   </div>
 
-  <audio id="bgMusic" loop>
-    {BG_MUSIC_SOURCE}
-  </audio>
 
 <script>
   // inject dynamic values from Python
@@ -231,32 +235,168 @@ html_template = r"""
   setInterval(twinkle, 1400);
 
   // ---------- countdown ----------
-  const targetDate = new Date(targetISO);
+  // ---------- countdown ----------
+let targetDate = new Date(targetISO);
 
-  function updateCountdown(){
+const storageKey = 'birthdayCelebrationStart';
+
+
+
+function startCelebration(){
+    // launch fireworks every 3s
+    launchFireworks(50);
+    window.celebrationInterval = setInterval(()=>launchFireworks(50), 3000);
+}
+
+function celebrateBirthday() {
+    // Prevent multiple triggers
+    if (window.celebrationActive) return;
+    window.celebrationActive = true;
+
+    // Hide original card & countdown
+    const card = document.getElementById('card');
+    if (card) card.style.display = 'none';
+
+    // Create fullscreen celebration container
+    const celebrationLayer = document.createElement('div');
+    celebrationLayer.id = 'celebrationLayer';
+    celebrationLayer.style.position = 'fixed';
+    celebrationLayer.style.top = 0;
+    celebrationLayer.style.left = 0;
+    celebrationLayer.style.width = '100%';
+    celebrationLayer.style.height = '100%';
+    celebrationLayer.style.background = 'linear-gradient(180deg, #0a0a1f, #1b1b3f)';
+    celebrationLayer.style.overflow = 'hidden';
+    celebrationLayer.style.zIndex = '9999';
+    celebrationLayer.style.display = 'flex';
+    celebrationLayer.style.flexDirection = 'column';
+    celebrationLayer.style.alignItems = 'center';
+    celebrationLayer.style.justifyContent = 'center';
+    document.body.appendChild(celebrationLayer);
+
+    // Add soft animated stars in background
+    const starCount = 150;
+    for (let i = 0; i < starCount; i++) {
+        const s = document.createElement('div');
+        s.className = 'celebrationStar';
+        s.style.width = s.style.height = (1 + Math.random() * 3) + 'px';
+        s.style.background = 'white';
+        s.style.borderRadius = '50%';
+        s.style.position = 'absolute';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.opacity = 0.2 + Math.random() * 0.5;
+        celebrationLayer.appendChild(s);
+    }
+
+    // Animate stars gently
+    function animateStars() {
+        const stars = document.querySelectorAll('.celebrationStar');
+        stars.forEach(s => {
+            let top = parseFloat(s.style.top);
+            top += 0.02 + Math.random() * 0.1;
+            if (top > 100) top = 0;
+            s.style.top = top + '%';
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+
+    // Add glowing, pulsing "Happy Birthday" text
+    const text = document.createElement('h1');
+    text.textContent = `🎉 Happy Birthday ${crushName}! 🎉`;
+    text.style.color = '#FFD166';
+    text.style.fontSize = 'clamp(32px, 8vw, 80px)';
+    text.style.fontWeight = '900';
+    text.style.textAlign = 'center';
+    text.style.textShadow = '0 0 10px #FF6A86, 0 0 20px #FF4663, 0 0 30px #7E7BFF';
+    text.style.animation = 'pulseGlow 2.5s infinite alternate';
+    celebrationLayer.appendChild(text);
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes pulseGlow {
+            0% { text-shadow: 0 0 10px #FF6A86, 0 0 20px #FF4663, 0 0 30px #7E7BFF; }
+            50% { text-shadow: 0 0 20px #FFD166, 0 0 40px #FF6A86, 0 0 60px #7E7BFF; }
+            100% { text-shadow: 0 0 10px #FF6A86, 0 0 20px #FF4663, 0 0 30px #7E7BFF; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Add falling confetti
+    const confettiCount = 80;
+    for (let i = 0; i < confettiCount; i++) {
+        const conf = document.createElement('div');
+        conf.style.width = conf.style.height = (4 + Math.random() * 6) + 'px';
+        conf.style.background = ['#FFD166', '#FF6A86', '#FF4663', '#7E7BFF', '#FFFFFF'][Math.floor(Math.random() * 5)];
+        conf.style.position = 'absolute';
+        conf.style.left = Math.random() * 100 + '%';
+        conf.style.top = -10 + 'px';
+        conf.style.borderRadius = '50%';
+        conf.style.opacity = 0.8;
+        celebrationLayer.appendChild(conf);
+
+        const speed = 1 + Math.random() * 2;
+        const angle = (Math.random() - 0.5) * 0.3;
+        function animateConf() {
+            let top = parseFloat(conf.style.top);
+            let left = parseFloat(conf.style.left);
+            top += speed;
+            left += angle;
+            if (top > window.innerHeight) top = -10;
+            if (left < 0) left = 100;
+            if (left > 100) left = 0;
+            conf.style.top = top + 'px';
+            conf.style.left = left + '%';
+            requestAnimationFrame(animateConf);
+        }
+        animateConf();
+    }
+
+    // Launch fireworks on canvas (reuse your canvas #fire)
+    launchFireworks(60);
+    if (!window.fireworksInterval) {
+        window.fireworksInterval = setInterval(() => launchFireworks(50 + Math.random() * 40), 800);
+    }
+
+    // Save celebration start to localStorage
+    localStorage.setItem(storageKey, new Date().toISOString());
+}
+
+
+// ---------- countdown update ----------
+function updateCountdown() {
     const now = new Date();
     let diff = targetDate - now;
-    if (diff <= 0){
-      document.getElementById('days').textContent = "0";
-      document.getElementById('hours').textContent = "00";
-      document.getElementById('minutes').textContent = "00";
-      document.getElementById('seconds').textContent = "00";
-      // auto celebration
-      launchFireworks(36);
-      return;
+    if (diff <= 0) {
+        // Trigger birthday celebration
+        celebrateBirthday();
+
+        // Set next year's birthday without modifying const directly
+        const nextYearDate = new Date(targetDate);
+        nextYearDate.setFullYear(nextYearDate.getFullYear() + 1);
+        targetDate = nextYearDate;
+
+        // Save to localStorage for 7-day celebration
+        localStorage.setItem(storageKey, new Date().toISOString());
+        diff = targetDate - now;
     }
-    const s = Math.floor(diff/1000);
+
+    const s = Math.floor(diff / 1000);
     const days = Math.floor(s / (3600*24));
     const hours = Math.floor((s % (3600*24)) / 3600);
     const minutes = Math.floor((s % 3600) / 60);
     const seconds = s % 60;
+
     document.getElementById('days').textContent = days;
-    document.getElementById('hours').textContent = String(hours).padStart(2,'0');
-    document.getElementById('minutes').textContent = String(minutes).padStart(2,'0');
-    document.getElementById('seconds').textContent = String(seconds).padStart(2,'0');
-  }
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
+    document.getElementById('hours').textContent = hours.toString().padStart(2,'0');
+    document.getElementById('minutes').textContent = minutes.toString().padStart(2,'0');
+    document.getElementById('seconds').textContent = seconds.toString().padStart(2,'0');
+}
+
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
 
   // ---------- fireworks (canvas) ----------
   const canvas = document.getElementById('fire');
@@ -324,14 +464,6 @@ html_template = r"""
     setTimeout(()=> txt.style.transform = '', 520);
   });
 
-  // play music control
-  const bg = document.getElementById('bgMusic');
-  const musicBtn = document.getElementById('musicBtn');
-  musicBtn.addEventListener('click', ()=>{
-    if (!bg.src) { musicBtn.textContent = 'No Music'; return; }
-    if (bg.paused){ bg.play().catch(()=>{}); musicBtn.textContent = 'Pause ♪'; }
-    else { bg.pause(); musicBtn.textContent = 'Play Music ♪'; }
-  });
 
   // attempt autoplay on first user gesture (mobile browsers block autoplay)
   function initOnGesture(){
@@ -357,22 +489,19 @@ html_template = r"""
 </html>
 """
 
-# --------- prepare replacements (safe) ----------
-# BG music source: if provided, create <source> tag; otherwise empty
-if BACKGROUND_MUSIC_URL and BACKGROUND_MUSIC_URL.strip():
-    bg_source = f"<source src=\"{BACKGROUND_MUSIC_URL.strip()}\" type=\"audio/mpeg\">"
-else:
-    bg_source = ""
 
-html = html_template.replace("{CRUSH_NAME}", CRUSH_NAME).replace("{TARGET_ISO}", target_iso).replace("{BG_MUSIC_SOURCE}", bg_source)
+# Prepare the HTML with replacements
+html = html_template.replace("{CRUSH_NAME}", CRUSH_NAME).replace("{TARGET_ISO}", target_iso)
 
 # --------- Render in Streamlit ----------
 st.components.v1.html(html, height=900, scrolling=False)
 
+
 import streamlit as st
 
+
 # Hide Streamlit header/footer and menu
-st.set_page_config(page_title="Happy Birthday", page_icon="💖", layout="wide")
+
 hide_streamlit_style = """
     <style>
     #MainMenu {visibility: hidden;}      /* hides menu (top-right hamburger) */
