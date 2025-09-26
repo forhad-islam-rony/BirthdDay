@@ -304,7 +304,9 @@ function celebrateBirthday() {
 
     // Add glowing, pulsing "Happy Birthday" text
     const text = document.createElement('h1');
-    text.textContent = `🎉 Happy Birthday ${crushName}! 🎉`;
+    text.innerHTML = `🎉 Happy Birthday 🎉<br><span style="color:#FFD166">${crushName}!</span>`;
+
+celebrationLayer.appendChild(text);
     text.style.color = '#FFD166';
     text.style.fontSize = 'clamp(32px, 8vw, 80px)';
     text.style.fontWeight = '900';
@@ -368,7 +370,6 @@ function celebrateBirthday() {
 function updateCountdown() {
     const now = new Date();
     let diff = targetDate - now;
-    diff = -1;
     if (diff <= 0) {
         // Trigger birthday celebration
         celebrateBirthday();
