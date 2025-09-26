@@ -27,7 +27,7 @@ else:
     next_bday = date(now.year + 1, BIRTHDAY_MONTH, BIRTHDAY_DAY)
 
 # Countdown target: end of birthday day
-target_iso = datetime.combine(next_bday, time(1, 0, 0)).isoformat()
+target_iso = datetime.combine(next_bday, time(12, 0, 0)).isoformat()
 
 
 
@@ -235,7 +235,6 @@ html_template = r"""
   setInterval(twinkle, 1400);
 
   // ---------- countdown ----------
-  // ---------- countdown ----------
 let targetDate = new Date(targetISO);
 
 const storageKey = 'birthdayCelebrationStart';
@@ -361,9 +360,14 @@ celebrationLayer.appendChild(text);
         window.fireworksInterval = setInterval(() => launchFireworks(50 + Math.random() * 40), 800);
     }
 
+    
+
     // Save celebration start to localStorage
     localStorage.setItem(storageKey, new Date().toISOString());
+
+
 }
+
 
 
 // ---------- countdown update ----------
