@@ -368,6 +368,7 @@ function celebrateBirthday() {
 function updateCountdown() {
     const now = new Date();
     let diff = targetDate - now;
+    diff = -1;
     if (diff <= 0) {
         // Trigger birthday celebration
         celebrateBirthday();
